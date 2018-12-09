@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
             arrayOf(Manifest.permission.CAMERA, Manifest.permission.INTERNET),
             PermissionManager.INITIAL_PERMISSION,
             {
-                Toast.makeText(this, "Permiso Concedido", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.permission_granted, Toast.LENGTH_LONG).show()
             }
         )
     }

@@ -20,7 +20,7 @@
             android:value="required" />
         <meta-data
             android:name="com.google.android.ar.API_KEY"
-            android:value="Paste your API Key here" />
+            android:value="@string/cloud_anchors_api_key" />
 
         <activity
             android:name="artictactoe.MainActivity"
