@@ -4,8 +4,9 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
-import android.support.v4.app.ActivityCompat
+import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentActivity
 import android.support.v4.content.ContextCompat
 import android.widget.Toast
 
@@ -14,13 +15,22 @@ import android.widget.Toast
  */
 
 class PermissionManager private constructor() {
+    private val permissionManagerFragment by lazy {
+        PermissionManagerFragment()
+    }
+    private lateinit var successFunction: () -> Unit
 
     fun checkPermission(
-        activity: Activity,
+        activity: FragmentActivity,
         permissionRequests: Array<String>?,
-        requestCode: Int
-
-    ): Boolean {
+        requestCode: Int,
+        successFunction: () -> Unit
+    ) {
+        this.successFunction = successFunction
+        activity.supportFragmentManager.beginTransaction()
+            .add(this.permissionManagerFragment, "")
+            .commitNowAllowingStateLoss()
+        activity.supportFragmentManager.executePendingTransactions()
 
         permissionRequests?.let {
             it.firstOrNull {
@@ -29,24 +39,16 @@ class PermissionManager private constructor() {
                     it
                 ) != PackageManager.PERMISSION_GRANTED
             }?.apply {
-                ActivityCompat.requestPermissions(
-                    activity,
+                permissionManagerFragment.requestPermissions(
                     permissionRequests,
                     requestCode
                 )
-                return false
             }
         }
-        return true
+        this.successFunction.invoke()
     }
 
-    fun checkIsSupportedDeviceOrFinish(activity: Activity): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            Toast.makeText(activity, "Sceneform requires Android N or later", Toast.LENGTH_LONG)
-                .show()
-            activity.finish()
-            return false
-        }
+    fun checkIsSupportedDeviceOrFinish(activity: Activity) {
         val openGlVersionString =
             (activity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
                 .deviceConfigurationInfo
@@ -55,14 +57,30 @@ class PermissionManager private constructor() {
             Toast.makeText(activity, "Sceneform requires OpenGL ES 3.0 or later", Toast.LENGTH_LONG)
                 .show()
             activity.finish()
-            return false
         }
-        return true
     }
 
     companion object {
+        class PermissionManagerFragment : Fragment() {
+            override fun onRequestPermissionsResult(
+                requestCode: Int,
+                permissions: Array<out String>,
+                grantResults: IntArray
+            ) {
+                grantResults.all { it == PERMISSION_GRANTED }.apply {
+                    when (requestCode) {
+                        INITIAL_PERMISSION -> {
+                            instance.successFunction.invoke()
+                        }
+                    }
+                }
+            }
+
+        }
+
         val instance by lazy { PermissionManager() }
         const val INITIAL_PERMISSION = 1
         const val MIN_OPENGL_VERSION = 3.0
     }
+
 }

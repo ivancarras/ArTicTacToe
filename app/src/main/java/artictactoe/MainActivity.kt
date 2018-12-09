@@ -3,6 +3,7 @@ package artictactoe
 import android.Manifest
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import artictactoe.managers.PermissionManager
 import tictactoe.R
 
@@ -18,7 +19,10 @@ class MainActivity : AppCompatActivity() {
         PermissionManager.instance.checkPermission(
             this,
             arrayOf(Manifest.permission.CAMERA, Manifest.permission.INTERNET),
-            PermissionManager.INITIAL_PERMISSION
+            PermissionManager.INITIAL_PERMISSION,
+            {
+                Toast.makeText(this, "Permiso Concedido", Toast.LENGTH_LONG).show()
+            }
         )
     }
 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ArTicTacToe</string>
+    <string name="permission_granted">Permisos concedidos</string>
 </resources>
