@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">ArTicTacToe</string>
     <string name="permission_granted">Permisos concedidos</string>
+    <string name="hosting_anchor">Hosteando anchor…</string>
+    <string name="hosting_error">Error hosteando anchor: </string>
+    <string name="hosting_success">Anchor alojado con id: </string>
+    <string name="hosting_resolving">Resolving Anchor…</string>
+    <string name="hosting_clear">Por favor, borra el anchor </string>
 </resources>

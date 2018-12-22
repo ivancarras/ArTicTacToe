@@ -10,7 +10,7 @@ import com.google.firebase.database.*
  * Created by Iván Carrasco Alonso on 10/12/2018.
  */
 /** Helper class for Firebase storage of cloud anchor IDs. */
-class StorageManager(context: Context) {
+class StoreManager(context: Context) {
     /** Listener for a new Cloud Anchor ID from the Firebase Database.  */
     interface CloudAnchorIdListener {
         fun onCloudAnchorIdAvailable(cloudAnchorId: String?)
@@ -71,7 +71,7 @@ class StorageManager(context: Context) {
      * Retrieves the cloud anchor ID using a short code. Returns an empty string if a cloud anchor ID
      * was not stored for this short code.
      */
-    fun getCloudAnchorID(shortCode: Int, listener: CloudAnchorIdListener) {
+    fun getCloudAnchorID(shortCode: Int, listener: (Any) -> Unit) {
         rootRef
             .child(KEY_PREFIX + shortCode)
             .addListenerForSingleValueEvent(
@@ -91,7 +91,7 @@ class StorageManager(context: Context) {
     }
 
     companion object {
-        val TAG = StorageManager.javaClass.name
+        val TAG = StoreManager.javaClass.name
         const val KEY_ROOT_DIR = "shared_anchor_codelab_root"
         const val KEY_NEXT_SHORT_CODE = "next_short_code"
         const val KEY_PREFIX = "anchor;"
