@@ -54,14 +54,14 @@ class ResolveDialogFragment : DialogFragment() {
             .setTitle("Resolve Anchor")
             .setPositiveButton(
                 "OK"
-            ) { dialog, which ->
+            ) { _, _ ->
                 val shortCodeText = shortCodeField.text
                 if (shortCodeText.isNotEmpty()) {
                     // Invoke the callback with the current checked item.
                     okListener?.onOkPressed(shortCodeText.toString())
                 }
             }
-            .setNegativeButton("Cancel") { dialog, which -> }
+            .setNegativeButton("Cancel") { _, _ -> }
         return builder.create()
     }
 }

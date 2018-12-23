@@ -1,10 +1,10 @@
 package artictactoe.handlers
 
-import android.content.Context
+import android.app.Activity
 import android.net.Uri
 import android.support.v7.app.AlertDialog
-import android.widget.Toast
 import artictactoe.managers.StoreManager
+import artictactoe.ui.SnackbarHelper
 import com.google.ar.core.Anchor
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.FrameTime
@@ -19,9 +19,13 @@ import tictactoe.R
  * Created by Ivan Carrasco Alonso on 03/12/2018.
  */
 
-class ArHandler(val fragment: ArFragment, val context: Context) {
+class ArHandler(
+    val fragment: ArFragment,
+    val activity: Activity,
+    val snackbarHelper: SnackbarHelper
+) {
     enum class AppAnchorState {
-        NONE, HOSTING, HOSTED, RESOLVING
+        NONE, HOSTING, HOSTED, RESOLVING, RESOLVED
     }
 
     var cloudAnchor: Anchor? = null
@@ -34,7 +38,7 @@ class ArHandler(val fragment: ArFragment, val context: Context) {
         }
     var appAnchorState = AppAnchorState.NONE
     val storeManager: StoreManager by lazy {
-        artictactoe.managers.StoreManager(context)
+        artictactoe.managers.StoreManager(activity.applicationContext)
     }
 
     fun placeObject(anchor: Anchor, model: Uri) {
@@ -43,7 +47,7 @@ class ArHandler(val fragment: ArFragment, val context: Context) {
             .build()
             .thenAccept { renderable -> addNodeToScene(anchor, renderable) }
             .exceptionally { throwable ->
-                val builder = AlertDialog.Builder(context)
+                val builder = AlertDialog.Builder(activity.applicationContext)
                 builder.setMessage(throwable.message)
                     .setTitle("Error!")
                 val dialog = builder.create()
@@ -67,27 +71,56 @@ class ArHandler(val fragment: ArFragment, val context: Context) {
 
     @Synchronized
     private fun checkUpdatedAnchor() {
-        if (appAnchorState !== AppAnchorState.HOSTING) {
+   /**     if (appAnchorState != AppAnchorState.HOSTING && appAnchorState != AppAnchorState.RESOLVING) {
             return
-        }
+        }**/
         val cloudState = cloudAnchor?.cloudAnchorState
 
         if (appAnchorState === AppAnchorState.HOSTING) {
             if (cloudState != null) {
                 if (cloudState.isError) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.hosting_error) + cloudState,
-                        Toast.LENGTH_LONG
-                    ).show()
+                    snackbarHelper.showMessage(
+                        activity,
+                        activity.getString(R.string.hosting_error) + cloudState
+                    )
+                    appAnchorState = AppAnchorState.NONE
+                }
+            }
+        } else if (cloudState == Anchor.CloudAnchorState.SUCCESS) {
+            storeManager.nextShortCode(object : StoreManager.ShortCodeListener {
+                override fun onShortCodeAvailable(shortCode: Int?) {
+                    if (shortCode == null) {
+                        snackbarHelper.showMessage(
+                            activity, "Could not get shortCode"
+                        )
+                        return
+                    }
+                    cloudAnchor?.let {
+                        storeManager.storeUsingShortCode(shortCode, it.cloudAnchorId)
+                    }
+
+
+                    snackbarHelper.showMessage(
+                        activity, "Anchor hosted! Cloud Short Code: " +
+                                shortCode
+                    )
+                    appAnchorState = AppAnchorState.HOSTED
+                }
+            })
+
+        } else if (appAnchorState == AppAnchorState.RESOLVING) {
+            if (cloudState != null) {
+                if (cloudState.isError) {
+                    snackbarHelper.showMessage(
+                        activity, "Error resolving anchor.. "
+                                + cloudState
+                    )
                     appAnchorState = AppAnchorState.NONE
                 } else if (cloudState == Anchor.CloudAnchorState.SUCCESS) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.hosting_success) + cloudAnchor?.cloudAnchorId,
-                        Toast.LENGTH_LONG
-                    ).show()
-                    appAnchorState = AppAnchorState.HOSTED
+                    snackbarHelper.showMessage(
+                        activity, "Anchor resolved successfully"
+                    )
+                    appAnchorState = AppAnchorState.RESOLVED
                 }
             }
         }

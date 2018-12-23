@@ -71,7 +71,7 @@ class StoreManager(context: Context) {
      * Retrieves the cloud anchor ID using a short code. Returns an empty string if a cloud anchor ID
      * was not stored for this short code.
      */
-    fun getCloudAnchorID(shortCode: Int, listener: (Any) -> Unit) {
+    fun getCloudAnchorID(shortCode: Int, listener: CloudAnchorIdListener) {
         rootRef
             .child(KEY_PREFIX + shortCode)
             .addListenerForSingleValueEvent(
@@ -91,10 +91,10 @@ class StoreManager(context: Context) {
     }
 
     companion object {
-        val TAG = StoreManager.javaClass.name
+        val TAG = StoreManager::class.java.name
         const val KEY_ROOT_DIR = "shared_anchor_codelab_root"
         const val KEY_NEXT_SHORT_CODE = "next_short_code"
         const val KEY_PREFIX = "anchor;"
-        const val INITIAL_SHORT_CODE = 142
+        const val INITIAL_SHORT_CODE = 143
     }
 }
