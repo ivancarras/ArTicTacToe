@@ -1,5 +1,6 @@
 package artictactoe.managers
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.util.Log
 import com.google.firebase.FirebaseApp
@@ -41,19 +42,22 @@ class StoreManager(context: Context) {
                 object : Transaction.Handler {
                     override fun onComplete(p0: DatabaseError?, p1: Boolean, p2: DataSnapshot?) {
                         if (!p1) {
-                            // Log.e(TAG, "Firebase Error", error.toException())
+                             Log.e(TAG, "Firebase Error", p0?.toException())
                             listener.onShortCodeAvailable(null)
                         } else {
-                            p2?.let {
-                                listener.onShortCodeAvailable(p2.value as Int)
+                            p2?.value?.let {
+                                val shortCode:Int = (it as Long).toInt()
+                                listener.onShortCodeAvailable(shortCode)
                             }
+
+
                         }
                     }
 
                     override fun doTransaction(p0: MutableData): Transaction.Result {
                         var shortCode = p0.value as? Int
                         if (shortCode == null) {
-                            shortCode = INITIAL_SHORT_CODE + 1
+                            shortCode = INITIAL_SHORT_CODE - 1
                         }
                         p0.value = shortCode + 1
                         return Transaction.success(p0)

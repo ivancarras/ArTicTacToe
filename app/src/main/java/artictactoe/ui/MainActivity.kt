@@ -42,11 +42,10 @@ class MainActivity : AppCompatActivity() {
         PermissionManager.instance.checkPermission(
             this,
             arrayOf(Manifest.permission.CAMERA, Manifest.permission.INTERNET),
-            PermissionManager.INITIAL_PERMISSION,
-            {
-                snackbarHelper.showMessage(this, getString(R.string.permission_granted))
-            }
-        )
+            PermissionManager.INITIAL_PERMISSION
+        ) {
+            snackbarHelper.showMessage(this, getString(R.string.permission_granted))
+        }
         clearButton.setOnClickListener {
             arHandler.cloudAnchor = null
         }
