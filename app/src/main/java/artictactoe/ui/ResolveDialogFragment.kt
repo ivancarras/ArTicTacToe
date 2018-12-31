@@ -1,7 +1,7 @@
 package artictactoe.ui
 
 /**
- * Created by Wembley Studios on 22/12/2018.
+ * Created by Ivan Carrasco on 22/12/2018.
  */
 import android.app.AlertDialog
 import android.app.Dialog
@@ -16,7 +16,7 @@ import android.widget.LinearLayout.LayoutParams
 /** A DialogFragment for the Resolve Dialog Box.  */
 class ResolveDialogFragment : DialogFragment() {
 
-    internal interface OkListener {
+    interface OkListener {
         fun onOkPressed(dialogValue: String)
     }
     private var okListener: OkListener? = null
@@ -54,14 +54,14 @@ class ResolveDialogFragment : DialogFragment() {
             .setTitle("Resolve Anchor")
             .setPositiveButton(
                 "OK"
-            ) { _, _ ->
+            ) { dialog, which ->
                 val shortCodeText = shortCodeField.text
                 if (shortCodeText.isNotEmpty()) {
                     // Invoke the callback with the current checked item.
                     okListener?.onOkPressed(shortCodeText.toString())
                 }
             }
-            .setNegativeButton("Cancel") { _, _ -> }
+            .setNegativeButton("Cancel") { dialog, which -> }
         return builder.create()
     }
 }

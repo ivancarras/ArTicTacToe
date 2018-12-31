@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.findFragmentById(R.id.sceneform_fragment) as CustomArFragment
     }
     private val arHandler by lazy {
-        ArHandler(customArFragment,this,snackbarHelper)
+        ArHandler(customArFragment, this, snackbarHelper)
     }
     private val clearButton by lazy {
         findViewById<Button>(R.id.clear_button)
@@ -32,6 +32,10 @@ class MainActivity : AppCompatActivity() {
 
     private val snackbarHelper by lazy {
         SnackbarHelper()
+    }
+
+    private val saveAnchor by lazy {
+        findViewById<Button>(R.id.save_anchor)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,25 +62,21 @@ class MainActivity : AppCompatActivity() {
                 dialog.setOkListener(object : ResolveDialogFragment.OkListener {
                     override fun onOkPressed(dialogValue: String) {
                         onResolveOkPressed(dialogValue)
-                        dialog.show(supportFragmentManager, "Resolve")
                     }
                 })
+                dialog.show(supportFragmentManager, "dialog")
             }
         }
-
 
         customArFragment.setOnTapArPlaneListener { hitResult, _, _ ->
-            arHandler.cloudAnchor =
-                    customArFragment.arSceneView.session.hostCloudAnchor(hitResult.createAnchor())
-
-            arHandler.appAnchorState = ArHandler.AppAnchorState.HOSTING
-            snackbarHelper.showMessage(this, getString(R.string.hosting_anchor))
-
-            arHandler.cloudAnchor?.let {
-                arHandler.placeObject(it, Uri.parse("ArcticFox_Posed.sfb"))
-            }
+            arHandler.createCloudAnchor(customArFragment, hitResult.createAnchor())
         }
         customArFragment.arSceneView.scene.addOnUpdateListener(arHandler::onUpdateFrame)
+
+        saveAnchor.setOnClickListener {
+
+        }
+
     }
 
     private fun onResolveOkPressed(dialogValue: String) {

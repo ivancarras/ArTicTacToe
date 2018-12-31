@@ -5,6 +5,7 @@ import android.net.Uri
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import artictactoe.managers.StoreManager
+import artictactoe.ui.CustomArFragment
 import artictactoe.ui.SnackbarHelper
 import com.google.ar.core.Anchor
 import com.google.ar.sceneform.AnchorNode
@@ -29,11 +30,14 @@ class ArHandler(
         NONE, HOSTING, HOSTED, RESOLVING, RESOLVED
     }
 
+    enum class AnchorTask {
+        UPDATE, CREATE
+    }
+
     var cloudAnchor: Anchor? = null
         set(anchor) {
-            cloudAnchor?.let {
-                it.detach()
-            }
+            cloudAnchor?.detach()
+
             field = anchor
             appAnchorState = AppAnchorState.NONE
         }
@@ -41,6 +45,8 @@ class ArHandler(
     val storeManager: StoreManager by lazy {
         artictactoe.managers.StoreManager(activity.applicationContext)
     }
+    var anchorTask = AnchorTask.CREATE
+    var myShortCode: Int? = null
 
     fun placeObject(anchor: Anchor, model: Uri) {
         ModelRenderable.builder()
@@ -77,6 +83,7 @@ class ArHandler(
         }
         val cloudState = cloudAnchor?.cloudAnchorState
         Log.i("CheckUpdatedAnchor", cloudState.toString())
+
         if (appAnchorState === AppAnchorState.HOSTING) {
             if (cloudState != null) {
                 if (cloudState.isError) {
@@ -86,26 +93,42 @@ class ArHandler(
                     )
                     appAnchorState = AppAnchorState.NONE
                 } else if (cloudState == Anchor.CloudAnchorState.SUCCESS) {
-                    storeManager.nextShortCode(object : StoreManager.ShortCodeListener {
-                        override fun onShortCodeAvailable(shortCode: Int?) {
-                            if (shortCode == null) {
+                    appAnchorState = AppAnchorState.HOSTED
+
+                    if (anchorTask == AnchorTask.CREATE) {
+                        storeManager.nextShortCode(object : StoreManager.ShortCodeListener {
+                            override fun onShortCodeAvailable(shortCode: Int?) {
+                                myShortCode = shortCode
+                                if (shortCode == null) {
+                                    snackbarHelper.showMessage(
+                                        activity, "Could not get shortCode"
+                                    )
+                                    return
+                                }
+                                cloudAnchor?.let {
+                                    storeManager.storeUsingShortCode(shortCode, it.cloudAnchorId)
+                                }
+
                                 snackbarHelper.showMessage(
-                                    activity, "Could not get shortCode"
+                                    activity, "Anchor hosted! Cloud Short Code: " +
+                                            shortCode
                                 )
-                                return
-                            }
-                            cloudAnchor?.let {
-                                storeManager.storeUsingShortCode(shortCode, it.cloudAnchorId)
-                            }
 
-
-                            snackbarHelper.showMessage(
-                                activity, "Anchor hosted! Cloud Short Code: " +
-                                        shortCode
-                            )
-                            appAnchorState = AppAnchorState.HOSTED
+                            }
+                        })
+                    } else if (anchorTask == AnchorTask.UPDATE) {
+                        myShortCode?.let { sc ->
+                            cloudAnchor?.let { ca ->
+                                storeManager.updateCloudAnchorID(
+                                    sc,
+                                    ca.cloudAnchorId
+                                )
+                                snackbarHelper.showMessage(
+                                    activity, "Anchor Updated!: "+myShortCode
+                                )
+                            }
                         }
-                    })
+                    }
                 }
 
             }
@@ -126,4 +149,17 @@ class ArHandler(
             }
         }
     }
+
+    fun createCloudAnchor(customArFragment: CustomArFragment, anchor: Anchor) {
+        this.cloudAnchor =
+                customArFragment.arSceneView.session.hostCloudAnchor(anchor)
+        this.anchorTask = AnchorTask.CREATE
+        this.appAnchorState = ArHandler.AppAnchorState.HOSTING
+        snackbarHelper.showMessage(activity, activity.getString(R.string.hosting_anchor))
+
+        this.cloudAnchor?.let {
+            this.placeObject(it, Uri.parse("ArcticFox_Posed.sfb"))
+        }
+    }
+
 }

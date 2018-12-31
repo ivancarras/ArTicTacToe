@@ -1,6 +1,5 @@
 package artictactoe.managers
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.util.Log
 import com.google.firebase.FirebaseApp
@@ -42,20 +41,18 @@ class StoreManager(context: Context) {
                 object : Transaction.Handler {
                     override fun onComplete(p0: DatabaseError?, p1: Boolean, p2: DataSnapshot?) {
                         if (!p1) {
-                             Log.e(TAG, "Firebase Error", p0?.toException())
+                            Log.e(TAG, "Firebase Error", p0?.toException())
                             listener.onShortCodeAvailable(null)
                         } else {
                             p2?.value?.let {
-                                val shortCode:Int = (it as Long).toInt()
+                                val shortCode: Int = (it as Long).toInt()
                                 listener.onShortCodeAvailable(shortCode)
                             }
-
-
                         }
                     }
 
                     override fun doTransaction(p0: MutableData): Transaction.Result {
-                        var shortCode = p0.value as? Int
+                        var shortCode: Int? = (p0.value as? Long)?.toInt()
                         if (shortCode == null) {
                             shortCode = INITIAL_SHORT_CODE - 1
                         }
@@ -94,11 +91,17 @@ class StoreManager(context: Context) {
                 })
     }
 
+    fun updateCloudAnchorID(shortCode: Int, cloudAnchorId: String) {
+        rootRef
+            .child(KEY_PREFIX + shortCode)
+            .setValue(cloudAnchorId)
+    }
+
     companion object {
         val TAG = StoreManager::class.java.name
-        const val KEY_ROOT_DIR = "shared_anchor_codelab_root"
+        const val KEY_ROOT_DIR = "ar_tic_tac_toe"
         const val KEY_NEXT_SHORT_CODE = "next_short_code"
         const val KEY_PREFIX = "anchor;"
-        const val INITIAL_SHORT_CODE = 143
+        const val INITIAL_SHORT_CODE = 0
     }
 }
