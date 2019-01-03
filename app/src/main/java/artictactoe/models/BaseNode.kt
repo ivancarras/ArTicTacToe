@@ -1,4 +1,4 @@
-package artictactoe.dataModels
+package artictactoe.models
 
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.Renderable
