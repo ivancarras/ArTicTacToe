@@ -1,4 +1,4 @@
-package artictactoe.ui
+package artictactoe.mvvm.ui
 
 import android.app.Activity
 import android.support.design.widget.BaseTransientBottomBar

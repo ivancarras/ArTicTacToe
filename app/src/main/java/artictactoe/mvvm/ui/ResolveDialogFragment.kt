@@ -1,4 +1,4 @@
-package artictactoe.ui
+package artictactoe.mvvm.ui
 
 /**
  * Created by Ivan Carrasco on 22/12/2018.

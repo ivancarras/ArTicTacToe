@@ -5,8 +5,8 @@ import android.net.Uri
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import artictactoe.managers.StoreManager
-import artictactoe.ui.CustomArFragment
-import artictactoe.ui.SnackbarHelper
+import artictactoe.mvvm.ui.CustomArFragment
+import artictactoe.mvvm.ui.SnackbarHelper
 import com.google.ar.core.Anchor
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.FrameTime

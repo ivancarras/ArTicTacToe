@@ -1,4 +1,4 @@
-package artictactoe.ui
+package artictactoe.mvvm.ui
 
 import android.Manifest
 import android.net.Uri

@@ -1,4 +1,4 @@
-package artictactoe.ui
+package artictactoe.mvvm.ui
 
 import com.google.ar.core.Config
 import com.google.ar.core.Session
