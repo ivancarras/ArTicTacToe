@@ -23,7 +23,7 @@
             android:value="@string/cloud_anchors_api_key" />
 
         <activity
-            android:name="artictactoe.mvvm.ui.MainActivity"
+            android:name="artictactoe.mvvm.view.MainActivity"
             android:configChanges="orientation|keyboard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

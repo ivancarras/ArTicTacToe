@@ -5,10 +5,10 @@ import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ModelRenderable
 
 /**
- * Created by Iván Carrasco on 06/01/2019.
+ * Created by Iván Carrasco Alonso on 12/01/2019.
  */
-
-class CircleToken(
+abstract class TokenNode(
+    val player: Player,
     nodeId: Int,
     modelRenderable: ModelRenderable,
     positionVector: Vector3,
@@ -16,5 +16,5 @@ class CircleToken(
     parent: Node
 ) : BaseNode(nodeId, modelRenderable, positionVector, rotation, parent) {
     override val nodetype: NodeType
-        get() = NodeType.CIRCLE
+        get() = player.nodeType
 }

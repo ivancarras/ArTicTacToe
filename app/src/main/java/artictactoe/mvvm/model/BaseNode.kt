@@ -9,10 +9,10 @@ import com.google.ar.sceneform.rendering.ModelRenderable
  * Created by Iván Carrasco on 31/12/2018.
  */
 abstract class BaseNode(
-    nodeId:Int,
-    modelRenderable: ModelRenderable,
-    positionVector: Vector3,
-    rotation: Float,
+    val nodeId:Int,
+    val modelRenderable: ModelRenderable,
+    var positionVector: Vector3,
+    var rotation: Float,
     parent: Node
 ) : Node() {
     abstract val nodetype: NodeType

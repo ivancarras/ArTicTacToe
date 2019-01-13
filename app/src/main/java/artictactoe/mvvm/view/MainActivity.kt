@@ -1,14 +1,18 @@
-package artictactoe.mvvm.ui
+package artictactoe.mvvm.view
 
 import android.Manifest
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Button
 import artictactoe.handlers.ArHandler
 import artictactoe.handlers.ArHandler.AppAnchorState
 import artictactoe.managers.PermissionManager
 import artictactoe.managers.StoreManager
+import artictactoe.mvvm.viewmodels.GameViewModel
 import tictactoe.R
 
 
@@ -38,10 +42,16 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.save_anchor)
     }
 
+    val gameViewModel by lazy {
+        ViewModelProviders.of(this).get(GameViewModel::class.java)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_layout)
-
+        gameViewModel.repository.gameInfoLiveData.observe(this, Observer {
+            Log.i("MainActivity","Game update");
+        })
         PermissionManager.instance.checkIsSupportedDeviceOrFinish(this)
         PermissionManager.instance.checkPermission(
             this,
