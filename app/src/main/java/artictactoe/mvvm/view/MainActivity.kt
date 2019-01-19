@@ -1,17 +1,10 @@
 package artictactoe.mvvm.view
 
 import android.Manifest
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import android.widget.Button
-import artictactoe.handlers.ArHandler
-import artictactoe.handlers.ArHandler.AppAnchorState
 import artictactoe.managers.PermissionManager
-import artictactoe.managers.StoreManager
 import artictactoe.mvvm.viewmodels.GameViewModel
 import tictactoe.R
 
@@ -23,23 +16,11 @@ class MainActivity : AppCompatActivity() {
     private val customArFragment by lazy {
         supportFragmentManager.findFragmentById(R.id.sceneform_fragment) as CustomArFragment
     }
-    private val arHandler by lazy {
-        ArHandler(customArFragment, this, snackbarHelper)
-    }
-    private val clearButton by lazy {
-        findViewById<Button>(R.id.clear_button)
-    }
-
-    private val resolveButton by lazy {
-        findViewById<Button>(R.id.resolve_button)
-    }
-
+    /*    private val arHandler by lazy {
+            DeprecatedArHandler(customArFragment, this, snackbarHelper)
+        }*/
     private val snackbarHelper by lazy {
         SnackbarHelper()
-    }
-
-    private val saveAnchor by lazy {
-        findViewById<Button>(R.id.save_anchor)
     }
 
     val gameViewModel by lazy {
@@ -49,9 +30,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_layout)
-        gameViewModel.repository.gameInfoLiveData.observe(this, Observer {
-            Log.i("MainActivity","Game update");
-        })
+
+        /*gameViewModel.repository.liveData.observe(this, Observer {
+             Log.i("MainActivity", "Game update")
+             //Update UI
+             //Update AR
+         })**/
+
         PermissionManager.instance.checkIsSupportedDeviceOrFinish(this)
         PermissionManager.instance.checkPermission(
             this,
@@ -60,37 +45,30 @@ class MainActivity : AppCompatActivity() {
         ) {
             snackbarHelper.showMessage(this, getString(R.string.permission_granted))
         }
-        clearButton.setOnClickListener {
-            arHandler.cloudAnchor = null
-        }
 
-        resolveButton.setOnClickListener {
-            if (arHandler.cloudAnchor != null) {
-                snackbarHelper.showMessage(this, getString(R.string.hosting_clear))
-            } else {
-                val dialog = ResolveDialogFragment()
-                dialog.setOkListener(object : ResolveDialogFragment.OkListener {
-                    override fun onOkPressed(dialogValue: String) {
-                        onResolveOkPressed(dialogValue)
-                    }
-                })
-                dialog.show(supportFragmentManager, "dialog")
-            }
+        /**resolveButton.setOnClickListener {
+        if (arHandler.cloudAnchor != null) {
+        snackbarHelper.showMessage(this, getString(R.string.hosting_clear))
+        } else {
+        val dialog = ResolveDialogFragment()
+        dialog.setOkListener(object : ResolveDialogFragment.OkListener {
+        override fun onOkPressed(dialogValue: String) {
+        onResolveOkPressed(dialogValue)
         }
-
-        customArFragment.setOnTapArPlaneListener { hitResult, _, _ ->
-            arHandler.createCloudAnchor(customArFragment, hitResult.createAnchor())
+        })
+        dialog.show(supportFragmentManager, "dialog")
         }
-        customArFragment.arSceneView.scene.addOnUpdateListener(arHandler::onUpdateFrame)
+        }**/
 
-        saveAnchor.setOnClickListener {
-
+        /**customArFragment.setOnTapArPlaneListener { hitResult, _, _ ->
+        arHandler.createCloudAnchor(customArFragment, hitResult.createAnchor())
         }
+        customArFragment.arSceneView.scene.addOnUpdateListener(arHandler::onUpdateFrame)**/
 
     }
 
     private fun onResolveOkPressed(dialogValue: String) {
-        val shortCode = Integer.parseInt(dialogValue)
+        /*val shortCode = Integer.parseInt(dialogValue)
         arHandler.storeManager.getCloudAnchorID(shortCode,
             object : StoreManager.CloudAnchorIdListener {
                 override fun onCloudAnchorIdAvailable(cloudAnchorId: String?) {
@@ -107,6 +85,6 @@ class MainActivity : AppCompatActivity() {
                     )
                     arHandler.appAnchorState = AppAnchorState.RESOLVING
                 }
-            })
+            })*/
     }
 }

@@ -3,19 +3,26 @@ package artictactoe.mvvm.model
 /**
  * Created by Iván Carrasco on 06/01/2019.
  */
-data class Game(val gameId: Int, val player1: Player, val player2: Player) {
-    lateinit var currentPlayer: Player
+data class Game(
+    val gameID: Int,
+    var player1: Player? = null,
+    var player2: Player? = null,
+    var cloudAnchorId: Int? = null
+) {
+    var currentPlayer: Player? = null
     val cells by lazy {
-        Array<Array<Cell>>(BOARD_SIZE) {
-            Array<Cell>(BOARD_SIZE) {
+        List<List<Cell>>(BOARD_SIZE) {
+            List<Cell>(BOARD_SIZE) {
                 Cell(null)
             }
         }
     }
 
-    init {
-        currentPlayer = player1
+    fun initGame() {
+        if (player1 != null)
+            currentPlayer = player1
     }
+
 
     fun horizontalLines(): Boolean {
         for (i in 0 until BOARD_SIZE) {
@@ -62,7 +69,8 @@ data class Game(val gameId: Int, val player1: Player, val player2: Player) {
     }
 
     fun switchPlayer() {
-        currentPlayer = if (currentPlayer == player1) player2 else player1
+        if (player1 != null && player2 != null)
+            currentPlayer = if (currentPlayer == player1) player2 else player1
     }
 
     fun hasGameEnded(): Boolean {
