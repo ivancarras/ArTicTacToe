@@ -1,9 +1,11 @@
 package artictactoe.mvvm.view
 
 import android.Manifest
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import artictactoe.managers.PermissionManager
 import artictactoe.mvvm.viewmodels.GameViewModel
 import tictactoe.R
@@ -30,11 +32,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_layout)
+        gameViewModel.currentGameLiveData.observe(this, Observer {
+            Log.i("MainActivity", "Game update")
+            //Update UI
+            //Update AR
+        })
+        /*gameViewModel.repository.currentGameLiveData.observe(this, Observer {
 
-        /*gameViewModel.repository.liveData.observe(this, Observer {
-             Log.i("MainActivity", "Game update")
-             //Update UI
-             //Update AR
          })**/
 
         PermissionManager.instance.checkIsSupportedDeviceOrFinish(this)

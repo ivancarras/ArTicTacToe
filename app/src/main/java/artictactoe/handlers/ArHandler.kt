@@ -1,13 +1,19 @@
 package artictactoe.handlers
 
+import android.net.Uri
 import android.util.Log
 import artictactoe.mvvm.view.CustomArFragment
 import com.google.ar.core.Anchor
+import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.rendering.ModelRenderable
+import com.google.ar.sceneform.rendering.Renderable
+import com.google.ar.sceneform.ux.ArFragment
+import com.google.ar.sceneform.ux.TransformableNode
 
 /**
  * Created by Iván Carrasco Alonso on 19/01/2019.
  */
-class ArHandler() {
+class ArHandler {
 
     enum class AppAnchorState {
         NONE, HOSTING, HOSTED, RESOLVING, RESOLVED
@@ -45,10 +51,10 @@ class ArHandler() {
         }
         //snackbarHelper.showMessage(activity, activity.getString(R.string.hosting_anchor))
 
-        /*
-            this.cloudAnchor?.let {
-            this.placeObject(it, Uri.parse("ArcticFox_Posed.sfb"))
-        }*/
+
+        this.cloudAnchor?.let {
+            this.placeObject(it, Uri.parse("ArcticFox_Posed.sfb"), customArFragment)
+        }
     }
 
     @Synchronized
@@ -97,6 +103,10 @@ class ArHandler() {
                             }
                         })*/
                     } else if (anchorTask == ArHandler.AnchorTask.UPDATE) {
+                        cloudAnchor?.let {
+                            getCloudAnchor(it.cloudAnchorId)
+                        }
+
                         /* myShortCode?.let { sc ->
                              cloudAnchor?.let { ca ->
                                  storeManager.updateCloudAnchorID(
@@ -130,5 +140,44 @@ class ArHandler() {
                 }
             }
         }
+    }
+
+    fun placeObject(anchor: Anchor, model: Uri, fragment: ArFragment) {
+        ModelRenderable.builder()
+            .setSource(fragment.context, model)
+            .build()
+            .thenAccept { renderable -> addNodeToScene(anchor, renderable, fragment) }
+            .exceptionally { throwable ->
+                /*val builder = AlertDialog.Builder(activity.applicationContext)
+                builder.setMessage(throwable.message)
+                    .setTitle("Error!")
+                val dialog = builder.create()
+                dialog.show()*/
+                null
+            }
+    }
+
+    fun addNodeToScene(anchor: Anchor, renderable: Renderable, fragment: ArFragment) {
+        val anchorNode = AnchorNode(anchor)
+        val node = TransformableNode(fragment.transformationSystem)
+        node.renderable = renderable
+        node.setParent(anchorNode)
+        fragment.arSceneView.scene.addChild(anchorNode)
+        node.select()
+    }
+
+    fun resolveAnchor(cloudAnchorID: String, customArFragment: CustomArFragment) {
+        val resolvedAnchor =
+            customArFragment.arSceneView.session.resolveCloudAnchor(cloudAnchorID)
+        cloudAnchor = resolvedAnchor
+        cloudAnchor?.let {
+            placeObject(it, Uri.parse("ArcticFox_Posed.sfb"), customArFragment)
+        }
+        /*snackbarHelper.showMessage(
+            this@MainActivity
+            ,
+            getString(R.string.hosting_resolving)
+        )*/
+        appAnchorState = AppAnchorState.RESOLVING
     }
 }

@@ -9,14 +9,16 @@ data class Game(
     var player2: Player? = null,
     var cloudAnchorId: Int? = null
 ) {
+    //Default constructor for firebase implementation
+    constructor() : this(0, null, null, null)
+
     var currentPlayer: Player? = null
-    val cells by lazy {
-        List<List<Cell>>(BOARD_SIZE) {
-            List<Cell>(BOARD_SIZE) {
-                Cell(null)
-            }
+    var cells = List<List<Cell>>(BOARD_SIZE) {
+        List<Cell>(BOARD_SIZE) {
+            Cell(null)
         }
     }
+
 
     fun initGame() {
         if (player1 != null)
