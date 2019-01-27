@@ -18,9 +18,6 @@ class MainActivity : AppCompatActivity() {
     private val customArFragment by lazy {
         supportFragmentManager.findFragmentById(R.id.sceneform_fragment) as CustomArFragment
     }
-    /*    private val arHandler by lazy {
-            DeprecatedArHandler(customArFragment, this, snackbarHelper)
-        }*/
     private val snackbarHelper by lazy {
         SnackbarHelper()
     }
@@ -37,9 +34,8 @@ class MainActivity : AppCompatActivity() {
             //Update UI
             //Update AR
         })
-        /*gameViewModel.repository.currentGameLiveData.observe(this, Observer {
 
-         })**/
+        gameViewModel.getGameRoomById("1", customArFragment)
 
         PermissionManager.instance.checkIsSupportedDeviceOrFinish(this)
         PermissionManager.instance.checkPermission(
@@ -49,46 +45,5 @@ class MainActivity : AppCompatActivity() {
         ) {
             snackbarHelper.showMessage(this, getString(R.string.permission_granted))
         }
-
-        /**resolveButton.setOnClickListener {
-        if (arHandler.cloudAnchor != null) {
-        snackbarHelper.showMessage(this, getString(R.string.hosting_clear))
-        } else {
-        val dialog = ResolveDialogFragment()
-        dialog.setOkListener(object : ResolveDialogFragment.OkListener {
-        override fun onOkPressed(dialogValue: String) {
-        onResolveOkPressed(dialogValue)
-        }
-        })
-        dialog.show(supportFragmentManager, "dialog")
-        }
-        }**/
-
-        /**customArFragment.setOnTapArPlaneListener { hitResult, _, _ ->
-        arHandler.createCloudAnchor(customArFragment, hitResult.createAnchor())
-        }
-        customArFragment.arSceneView.scene.addOnUpdateListener(arHandler::onUpdateFrame)**/
-
-    }
-
-    private fun onResolveOkPressed(dialogValue: String) {
-        /*val shortCode = Integer.parseInt(dialogValue)
-        arHandler.storeManager.getCloudAnchorID(shortCode,
-            object : StoreManager.CloudAnchorIdListener {
-                override fun onCloudAnchorIdAvailable(cloudAnchorId: String?) {
-                    val resolvedAnchor =
-                        customArFragment.arSceneView.session.resolveCloudAnchor(cloudAnchorId as String)
-                    arHandler.cloudAnchor = resolvedAnchor
-                    arHandler.cloudAnchor?.let {
-                        arHandler.placeObject(it, Uri.parse("ArcticFox_Posed.sfb"))
-                    }
-                    snackbarHelper.showMessage(
-                        this@MainActivity
-                        ,
-                        getString(R.string.hosting_resolving)
-                    )
-                    arHandler.appAnchorState = AppAnchorState.RESOLVING
-                }
-            })*/
     }
 }

@@ -1,6 +1,5 @@
 package artictactoe.mvvm.repository
 
-import android.arch.lifecycle.MutableLiveData
 import android.util.Log
 import artictactoe.managers.StoreManager
 import artictactoe.mvvm.model.BaseNode
@@ -8,16 +7,16 @@ import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.model.Game
 import artictactoe.mvvm.model.Player
 import com.google.firebase.database.*
-
+import io.reactivex.Single
+import io.reactivex.SingleEmitter
 
 /**
  * Created by Iván Carrasco Alonso on 13/01/2019.
  */
-class Repository(
-    currentGameLiveData: MutableLiveData<Game>,
-    val gameRoomsLiveData: MutableLiveData<List<Game>>
-) : FirebaseRepositoryBase<Game>(currentGameLiveData) {
-
+class Repository {
+    val firebaseInstance by lazy {
+        FirebaseDatabase.getInstance()
+    }
     //1. Create room-
     //1.1 Get gameID-
     //1.2 Add Cloud anchor ID associated to GameID
@@ -28,13 +27,16 @@ class Repository(
     //2.4 Set Cells
     //2.5 Switch Current Player
 
-    fun createGameRoom() {
-        getGameId()
+    fun createGameRoom(): Single<Game> {
+        //The call method?
+        return Single.create<Game> { emitter ->
+            requestCreateRoom(emitter)
+        }
     }
 
-    private fun getGameId() {
+    private fun requestCreateRoom(emitter: SingleEmitter<Game>) {
         firebaseInstance
-            .getReference(KEY_ROOT_DIR)
+            .getReference(KEY_ROOT_DIR_GAMES)
             .child(KEY_NEXT_GAME_ID)
             .runTransaction(object : Transaction.Handler {
                 override fun onComplete(p0: DatabaseError?, p1: Boolean, p2: DataSnapshot?) {
@@ -43,7 +45,7 @@ class Repository(
                     } else {
                         p2?.value?.let {
                             val gameId: Int = (it as Long).toInt()
-                            insertInitialGameData(gameId)
+                            insertInitialGameData(gameId, emitter)
                         }
                     }
                 }
@@ -59,44 +61,47 @@ class Repository(
             })
     }
 
-    fun addCloudAnchorID(cloudAnchorID: String) {
+    private fun insertInitialGameData(gameID: Int, emitter: SingleEmitter<Game>) {
+        val newGame = Game(gameID)
         firebaseInstance
-            .getReference(KEY_ROOT_DIR)
-            .child(liveData.value?.gameID.toString())
+            .getReference(KEY_ROOT_DIR_GAMES)
+            .child(gameID.toString())
+            .setValue(newGame)
+            .addOnCompleteListener {
+                emitter.onSuccess(newGame)
+            }
+    }
+
+    fun addCloudAnchorID(cloudAnchorID: String, gameID: Int): Single<Game> {
+        return Single.create { emitter ->
+            requestSetCloudAnchorID(cloudAnchorID, gameID, emitter)
+        }
+    }
+
+    private fun requestSetCloudAnchorID(
+        cloudAnchorID: String,
+        gameID: Int,
+        emitter: SingleEmitter<Game>
+    ) {
+        firebaseInstance
+            .getReference(KEY_ROOT_DIR_GAMES)
+            .child(gameID.toString())
             .child("cloudAnchorId")
             .setValue(cloudAnchorID)
             .addOnSuccessListener {
-                liveData.value?.cloudAnchorId = cloudAnchorID.toInt()
+                emitter.onSuccess(Game())
             }
     }
 
-    fun getGameRooms() {
-        firebaseInstance
-            .getReference(KEY_ROOT_DIR)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onCancelled(p0: DatabaseError) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onDataChange(p0: DataSnapshot) {
-                    val gameRooms: MutableList<Game> = mutableListOf<Game>()
-                    p0.children.forEach {
-                        if (it.key != KEY_NEXT_GAME_ID) {
-                            val gameToAdd = it.getValue(Game::class.java)
-                            gameToAdd?.let {
-                                gameRooms.add(gameToAdd)
-                            }
-                        }
-                    }
-                    gameRoomsLiveData.value = gameRooms
-                }
-            }
-            )
+    fun getGameRoomByID(gameID: String): Single<Game> {
+        return Single.create { emitter ->
+            requestGameRoomByID(gameID, emitter)
+        }
     }
 
-    fun getGameRoomByID(gameID: String, cloudAnchorCallback: (Int) -> Unit) {
+    private fun requestGameRoomByID(gameID: String, emitter: SingleEmitter<Game>) {
         firebaseInstance
-            .getReference(KEY_ROOT_DIR)
+            .getReference(KEY_ROOT_DIR_GAMES)
             .child(gameID)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -104,92 +109,84 @@ class Repository(
                 }
 
                 override fun onDataChange(p0: DataSnapshot) {
-                    liveData.value = p0.getValue(Game::class.java)
-                    liveData.value?.cloudAnchorId?.let {
-                        cloudAnchorCallback(it)
+                    p0.getValue(Game::class.java)?.let {
+                        emitter.onSuccess(it)
                     }
                 }
             }
             )
     }
 
-    private fun insertInitialGameData(gameID: Int) {
-        val newGame = Game(gameID)
-        firebaseInstance
-            .getReference(KEY_ROOT_DIR)
-            .child(gameID.toString())
-            .setValue(newGame)
-            .addOnCompleteListener {
-                liveData.value = newGame
-            }
-    }
-
-    fun introPlayerData(userName: String) {
-        //Check if the table is not full
-        if (!tableIsFull()) {
-            if (liveData.value?.player1 == null) {
-                val player1 = Player(userName, BaseNode.NodeType.X)
-
-                firebaseInstance
-                    .getReference(KEY_ROOT_DIR)
-                    .child(liveData.value?.gameID.toString())
-                    .child("player1")
-                    .setValue(player1)
-                    .addOnSuccessListener {
-                        liveData.value?.currentPlayer = player1
-                        liveData.value?.player1 = player1
-                    }
-
-
-            } else if (liveData.value?.player2 == null) {
-                val player2 = Player(userName, BaseNode.NodeType.CIRCLE)
-                firebaseInstance
-                    .getReference(KEY_ROOT_DIR)
-                    .child(liveData.value?.gameID.toString())
-                    .child("player2")
-                    .setValue(player2)
-                    .addOnSuccessListener {
-                        liveData.value?.player2 = player2
-                    }
-            }
+    fun introPlayerData(userName: String, gameID: Int, playerOrder: String): Single<Player> {
+        return Single.create { emitter ->
+            requestIntroPlayerData(userName, gameID, playerOrder, emitter)
         }
     }
 
-    private fun tableIsFull() =
-        !(liveData.value?.player1 == null || liveData.value?.player2 == null)
+    fun requestIntroPlayerData(
+        userName: String,
+        gameID: Int,
+        playerOrder: String,
+        emitter: SingleEmitter<Player>
+    ) {
+        val player = if (playerOrder == "player1") Player(
+            userName,
+            BaseNode.NodeType.X
+        ) else Player(userName, BaseNode.NodeType.CIRCLE)
 
-    fun setCells(cells: List<List<Cell>>) {
         firebaseInstance
-            .getReference(KEY_ROOT_DIR)
-            .child(liveData.value?.gameID.toString())
+            .getReference(KEY_ROOT_DIR_GAMES)
+            .child(gameID.toString())
+            .child(playerOrder)
+            .setValue(player)
+            .addOnSuccessListener {
+                emitter.onSuccess(player)
+            }
+    }
+
+    fun setCells(cells: List<List<Cell>>, gameID: Int): Single<List<List<Cell>>> {
+        return Single.create { emitter ->
+            requestSetCells(cells, gameID, emitter)
+        }
+    }
+
+    private fun requestSetCells(
+        cells: List<List<Cell>>,
+        gameID: Int,
+        emitter: SingleEmitter<List<List<Cell>>>
+    ) {
+        firebaseInstance
+            .getReference(KEY_ROOT_DIR_GAMES)
+            .child(gameID.toString())
             .child("cells")
             .setValue(cells)
             .addOnSuccessListener {
-                liveData.value?.cells = cells
+                emitter.onSuccess(cells)
             }
     }
 
-    fun switchCurrentPlayer() {
-        val currentPlayer = getDistinctPlayer()
-        if (currentPlayer != null) {
-            firebaseInstance
-                .getReference(KEY_ROOT_DIR)
-                .child(liveData.value?.gameID.toString())
-                .child("currentPlayer")
-                .setValue(currentPlayer)
-                .addOnSuccessListener {
-                    liveData.value?.currentPlayer = currentPlayer
-                }
+    fun switchCurrentPlayer(player: Player, gameID: Int): Single<Player> {
+        return Single.create { emitter ->
+            requestSwitchCurrentPlayer(player, gameID, emitter)
         }
     }
 
-    private fun getDistinctPlayer() =
-        if (liveData.value?.currentPlayer == liveData.value?.player1) liveData.value?.player2
-        else liveData.value?.player1
+    fun requestSwitchCurrentPlayer(player: Player, gameID: Int, emitter: SingleEmitter<Player>) {
+
+        firebaseInstance
+            .getReference(KEY_ROOT_DIR_GAMES)
+            .child(gameID.toString())
+            .child("currentPlayer")
+            .setValue(player)
+            .addOnSuccessListener {
+                emitter.onSuccess(player)
+            }
+
+    }
 
 
     companion object {
-        const val KEY_ROOT_DIR = "ar_tic_tac_toe"
+        const val KEY_ROOT_DIR_GAMES = "games_data"
         const val KEY_NEXT_GAME_ID = "next_game_id"
         const val INITIAL_GAME_ID = 0
     }

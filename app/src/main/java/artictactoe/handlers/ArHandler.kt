@@ -2,6 +2,7 @@ package artictactoe.handlers
 
 import android.net.Uri
 import android.util.Log
+import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.view.CustomArFragment
 import com.google.ar.core.Anchor
 import com.google.ar.sceneform.AnchorNode
@@ -42,7 +43,7 @@ class ArHandler {
     ) {
 
         this.cloudAnchor =
-                customArFragment.arSceneView.session.hostCloudAnchor(anchor)
+            customArFragment.arSceneView.session.hostCloudAnchor(anchor)
         this.anchorTask = ArHandler.AnchorTask.CREATE
         this.appAnchorState = ArHandler.AppAnchorState.HOSTING
 
@@ -51,10 +52,9 @@ class ArHandler {
         }
         //snackbarHelper.showMessage(activity, activity.getString(R.string.hosting_anchor))
 
-
-        this.cloudAnchor?.let {
+/*        this.cloudAnchor?.let {
             this.placeObject(it, Uri.parse("ArcticFox_Posed.sfb"), customArFragment)
-        }
+        }*/
     }
 
     @Synchronized
@@ -163,21 +163,36 @@ class ArHandler {
         node.renderable = renderable
         node.setParent(anchorNode)
         fragment.arSceneView.scene.addChild(anchorNode)
-        node.select()
+        //node.select()
     }
 
+    //Temporal
     fun resolveAnchor(cloudAnchorID: String, customArFragment: CustomArFragment) {
         val resolvedAnchor =
             customArFragment.arSceneView.session.resolveCloudAnchor(cloudAnchorID)
         cloudAnchor = resolvedAnchor
-        cloudAnchor?.let {
+
+        //We have to render the board
+        /*cloudAnchor?.let {
             placeObject(it, Uri.parse("ArcticFox_Posed.sfb"), customArFragment)
-        }
+        }*/
         /*snackbarHelper.showMessage(
             this@MainActivity
             ,
             getString(R.string.hosting_resolving)
         )*/
         appAnchorState = AppAnchorState.RESOLVING
+    }
+
+    fun update3DScene(cells: List<List<Cell>>) {
+        //we have to draw the tokens line by line
+        //if is empty we draw nothing
+        cells.forEach {
+            it.forEach {
+                if (!it.isEmpty()) {
+                    //Draw the cell in his token position
+                }
+            }
+        }
     }
 }

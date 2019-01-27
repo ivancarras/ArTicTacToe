@@ -5,20 +5,19 @@ package artictactoe.mvvm.model
  */
 data class Game(
     val gameID: Int,
-    var player1: Player? = null,
-    var player2: Player? = null,
-    var cloudAnchorId: Int? = null
-) {
-    //Default constructor for firebase implementation
-    constructor() : this(0, null, null, null)
-
-    var currentPlayer: Player? = null
-    var cells = List<List<Cell>>(BOARD_SIZE) {
+    val player1: Player? = null,
+    val player2: Player? = null,
+    val cloudAnchorId: Int? = null,
+    val cells: List<List<Cell>> = List<List<Cell>>(BOARD_SIZE) {
         List<Cell>(BOARD_SIZE) {
             Cell(null)
         }
-    }
-
+    },
+    val boardNode: BoardNode? = null,
+    var currentPlayer: Player? = null
+) {
+    //Default constructor for firebase implementation
+    constructor() : this(0, null, null, null, emptyList(), null)
 
     fun initGame() {
         if (player1 != null)
