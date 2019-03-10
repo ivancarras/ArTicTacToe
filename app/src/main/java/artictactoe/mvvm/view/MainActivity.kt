@@ -3,10 +3,14 @@ package artictactoe.mvvm.view
 import android.Manifest
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
+import android.widget.TextView
 import artictactoe.managers.PermissionManager
+import artictactoe.mvvm.utils.findView
 import artictactoe.mvvm.viewmodels.GameViewModel
 import tictactoe.R
 
@@ -18,6 +22,8 @@ class MainActivity : AppCompatActivity() {
     private val customArFragment by lazy {
         supportFragmentManager.findFragmentById(R.id.sceneform_fragment) as CustomArFragment
     }
+    
+   // private val textView: TextView by findView()
     private val snackbarHelper by lazy {
         SnackbarHelper()
     }

@@ -7,6 +7,7 @@ import artictactoe.managers.DisposableManager
 import artictactoe.mvvm.model.BaseNode
 import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.model.Game
+import artictactoe.mvvm.repository.IRepository
 import artictactoe.mvvm.repository.Repository
 import artictactoe.mvvm.view.CustomArFragment
 import com.google.ar.core.Anchor
@@ -23,13 +24,12 @@ class GameViewModel : ViewModel() {
     private val arHandler by lazy {
         ArHandler()
     }
-    private val repository by lazy {
+    private val repository: IRepository by lazy {
         Repository()
     }
     private val disposableManager by lazy {
         DisposableManager.instance
     }
-
 
     override fun onCleared() {
         disposableManager.clear()
