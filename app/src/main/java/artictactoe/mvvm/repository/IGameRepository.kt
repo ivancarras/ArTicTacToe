@@ -9,5 +9,5 @@ import io.reactivex.Single
 interface IGameRepository {
     fun createGameRoom(): Single<Game>
     fun addCloudAnchorID(cloudAnchorID: String, gameID: Int): Single<Game>
-    fun getGameRoomByID(gameID: String): Single<Game>
+    fun getGameRoomByID(gameID: Int): Single<Game>
 }

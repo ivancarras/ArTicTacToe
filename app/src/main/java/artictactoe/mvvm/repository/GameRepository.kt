@@ -6,6 +6,7 @@ import artictactoe.mvvm.model.Game
 import com.google.firebase.database.*
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
+import io.reactivex.schedulers.Schedulers
 
 /**
  * Created by Iván Carrasco Alonso on 10/03/2019.
@@ -13,22 +14,21 @@ import io.reactivex.SingleEmitter
 class GameRepository(val firebaseInstance: FirebaseDatabase) : IGameRepository {
 
     override fun createGameRoom(): Single<Game> {
-        //The call method?
         return Single.create<Game> { emitter ->
             requestCreateRoom(emitter)
-        }
+        }.subscribeOn(Schedulers.single())
     }
 
     override fun addCloudAnchorID(cloudAnchorID: String, gameID: Int): Single<Game> {
-        return Single.create { emitter ->
+        return Single.create<Game> { emitter ->
             requestSetCloudAnchorID(cloudAnchorID, gameID, emitter)
-        }
+        }.subscribeOn(Schedulers.single())
     }
 
-    override fun getGameRoomByID(gameID: String): Single<Game> {
-        return Single.create { emitter ->
+    override fun getGameRoomByID(gameID: Int): Single<Game> {
+        return Single.create<Game> { emitter ->
             requestGameRoomByID(gameID, emitter)
-        }
+        }.subscribeOn(Schedulers.single())
     }
 
     private fun requestCreateRoom(emitter: SingleEmitter<Game>) {
@@ -84,10 +84,10 @@ class GameRepository(val firebaseInstance: FirebaseDatabase) : IGameRepository {
             }
     }
 
-    private fun requestGameRoomByID(gameID: String, emitter: SingleEmitter<Game>) {
+    private fun requestGameRoomByID(gameID: Int, emitter: SingleEmitter<Game>) {
         firebaseInstance
             .getReference(FirebaseRepository.KEY_ROOT_DIR_GAMES)
-            .child(gameID)
+            .child(gameID.toString())
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

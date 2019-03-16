@@ -17,14 +17,13 @@ class Repository : IRepository {
     override fun setCells(cells: List<List<Cell>>, gameID: Int): Single<List<List<Cell>>> =
         firebaseRepository.setCells(cells, gameID)
 
-
     override fun createGameRoom(): Single<Game> =
         firebaseRepository.createGameRoom()
 
     override fun addCloudAnchorID(cloudAnchorID: String, gameID: Int): Single<Game> =
         firebaseRepository.addCloudAnchorID(cloudAnchorID, gameID)
 
-    override fun getGameRoomByID(gameID: String): Single<Game> =
+    override fun getGameRoomByID(gameID: Int): Single<Game> =
         firebaseRepository.getGameRoomByID(gameID)
 
     override fun introPlayerData(userName: String, gameID: Int, playerOrder: String): Single<Player> =

@@ -5,21 +5,22 @@ import artictactoe.mvvm.model.Player
 import com.google.firebase.database.FirebaseDatabase
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
+import io.reactivex.schedulers.Schedulers
 
 /**
  * Created by Iván Carrasco Alonso on 10/03/2019.
  */
 class PlayerRepository(val firebaseInstance: FirebaseDatabase) : IPlayerRepository {
     override fun introPlayerData(userName: String, gameID: Int, playerOrder: String): Single<Player> {
-        return Single.create { emitter ->
+        return Single.create<Player> { emitter ->
             requestIntroPlayerData(userName, gameID, playerOrder, emitter)
-        }
+        }.subscribeOn(Schedulers.single())
     }
 
     override fun switchCurrentPlayer(player: Player, gameID: Int): Single<Player> {
-        return Single.create { emitter ->
+        return Single.create<Player> { emitter ->
             requestSwitchCurrentPlayer(player, gameID, emitter)
-        }
+        }.subscribeOn(Schedulers.single())
     }
 
     private fun requestSwitchCurrentPlayer(player: Player, gameID: Int, emitter: SingleEmitter<Player>) {

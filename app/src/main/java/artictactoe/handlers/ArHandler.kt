@@ -10,11 +10,14 @@ import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import io.reactivex.Single
+import io.reactivex.SingleEmitter
+import io.reactivex.schedulers.Schedulers
 
 /**
  * Created by Iván Carrasco Alonso on 19/01/2019.
  */
-class ArHandler {
+class ArHandler : IArHandler {
 
     enum class AppAnchorState {
         NONE, HOSTING, HOSTED, RESOLVING, RESOLVED
@@ -24,41 +27,51 @@ class ArHandler {
         UPDATE, CREATE
     }
 
-    var cloudAnchor: Anchor? = null
+    private var cloudAnchor: Anchor? = null
         set(anchor) {
             cloudAnchor?.detach()
-
             field = anchor
             appAnchorState = ArHandler.AppAnchorState.NONE
         }
-
-    var appAnchorState = ArHandler.AppAnchorState.NONE
-
-    var anchorTask = ArHandler.AnchorTask.CREATE
-
-    fun createCloudAnchor(
+    private var appAnchorState = ArHandler.AppAnchorState.NONE
+    private var anchorTask = ArHandler.AnchorTask.CREATE
+    
+    override fun createCloudAnchor(
         customArFragment: CustomArFragment,
-        anchor: Anchor,
-        getCloudAnchor: (cloudAnchorID: String) -> Unit
-    ) {
+        anchor: Anchor
+    ): Single<String> {
 
         this.cloudAnchor =
-            customArFragment.arSceneView.session.hostCloudAnchor(anchor)
+            customArFragment.arSceneView.session?.hostCloudAnchor(anchor)
         this.anchorTask = ArHandler.AnchorTask.CREATE
         this.appAnchorState = ArHandler.AppAnchorState.HOSTING
 
-        customArFragment.arSceneView.scene.addOnUpdateListener {
-            checkUpdatedAnchor(getCloudAnchor)
-        }
-        //snackbarHelper.showMessage(activity, activity.getString(R.string.hosting_anchor))
-
-/*        this.cloudAnchor?.let {
-            this.placeObject(it, Uri.parse("ArcticFox_Posed.sfb"), customArFragment)
-        }*/
+        return Single.create<String> { emitter ->
+            customArFragment.arSceneView.scene.addOnUpdateListener {
+                checkUpdatedAnchor(emitter)
+            }
+        }.subscribeOn(Schedulers.single())
     }
 
-    @Synchronized
-    private fun checkUpdatedAnchor(getCloudAnchor: (cloudAnchorID: String) -> Unit) {
+    //Temporal
+    override fun resolveCloudAnchor(cloudAnchorID: String, customArFragment: CustomArFragment) {
+        val resolvedAnchor =
+            customArFragment.arSceneView.session?.resolveCloudAnchor(cloudAnchorID)
+        cloudAnchor = resolvedAnchor
+
+        //We have to render the board
+        /*cloudAnchor?.let {
+            placeObject(it, Uri.parse("ArcticFox_Posed.sfb"), customArFragment)
+        }*/
+        /*snackbarHelper.showMessage(
+            this@MainActivity
+            ,
+            getString(R.string.hosting_resolving)
+        )*/
+        appAnchorState = AppAnchorState.RESOLVING
+    }
+
+    private fun checkUpdatedAnchor(emitter: SingleEmitter<String>) {
         if (appAnchorState != ArHandler.AppAnchorState.HOSTING && appAnchorState != ArHandler.AppAnchorState.RESOLVING) {
             return
         }
@@ -74,12 +87,14 @@ class ArHandler {
                                    activity.getString(R.string.hosting_error) + cloudState
                                )*/
                     appAnchorState = ArHandler.AppAnchorState.NONE
+                    emitter.onError(Throwable("Server error"))
+
                 } else if (cloudState == Anchor.CloudAnchorState.SUCCESS) {
                     appAnchorState = ArHandler.AppAnchorState.HOSTED
 
                     if (anchorTask == ArHandler.AnchorTask.CREATE) {
                         cloudAnchor?.let {
-                            getCloudAnchor(it.cloudAnchorId)
+                            emitter.onSuccess(it.cloudAnchorId)
                         }
 
                         /*storeManager.nextShortCode(object : StoreManager.ShortCodeListener {
@@ -104,7 +119,7 @@ class ArHandler {
                         })*/
                     } else if (anchorTask == ArHandler.AnchorTask.UPDATE) {
                         cloudAnchor?.let {
-                            getCloudAnchor(it.cloudAnchorId)
+                            emitter.onSuccess(it.cloudAnchorId)
                         }
 
                         /* myShortCode?.let { sc ->
@@ -130,13 +145,16 @@ class ArHandler {
                                        + cloudState
                            )*/
                     appAnchorState = ArHandler.AppAnchorState.NONE
+                    emitter.onError(Throwable("Server error"))
                 } else if (cloudState == Anchor.CloudAnchorState.SUCCESS) {
 /*
                     snackbarHelper.showMessage(
                         activity, "Anchor resolved successfully"
-                    )
-*/
+                    )*/
                     appAnchorState = ArHandler.AppAnchorState.RESOLVED
+                    cloudAnchor?.let {
+                        emitter.onSuccess(it.cloudAnchorId)
+                    }
                 }
             }
         }
@@ -164,24 +182,6 @@ class ArHandler {
         node.setParent(anchorNode)
         fragment.arSceneView.scene.addChild(anchorNode)
         //node.select()
-    }
-
-    //Temporal
-    fun resolveAnchor(cloudAnchorID: String, customArFragment: CustomArFragment) {
-        val resolvedAnchor =
-            customArFragment.arSceneView.session.resolveCloudAnchor(cloudAnchorID)
-        cloudAnchor = resolvedAnchor
-
-        //We have to render the board
-        /*cloudAnchor?.let {
-            placeObject(it, Uri.parse("ArcticFox_Posed.sfb"), customArFragment)
-        }*/
-        /*snackbarHelper.showMessage(
-            this@MainActivity
-            ,
-            getString(R.string.hosting_resolving)
-        )*/
-        appAnchorState = AppAnchorState.RESOLVING
     }
 
     fun update3DScene(cells: List<List<Cell>>) {

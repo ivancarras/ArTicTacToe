@@ -4,16 +4,17 @@ import artictactoe.mvvm.model.Cell
 import com.google.firebase.database.FirebaseDatabase
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
+import io.reactivex.schedulers.Schedulers
 
 /**
  * Created by Iván Carrasco Alonso on 10/03/2019.
  */
-class CellRepository(val firebaseInstance: FirebaseDatabase) : ICellRepository{
+class CellRepository(val firebaseInstance: FirebaseDatabase) : ICellRepository {
 
     override fun setCells(cells: List<List<Cell>>, gameID: Int): Single<List<List<Cell>>> {
-        return Single.create { emitter ->
+        return Single.create<List<List<Cell>>> { emitter ->
             requestSetCells(cells, gameID, emitter)
-        }
+        }.subscribeOn(Schedulers.single())
     }
 
     private fun requestSetCells(

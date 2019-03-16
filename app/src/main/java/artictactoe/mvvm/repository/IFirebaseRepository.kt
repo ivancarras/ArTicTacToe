@@ -12,7 +12,7 @@ interface IFirebaseRepository {
     fun setCells(cells: List<List<Cell>>, gameID: Int): Single<List<List<Cell>>>
     fun createGameRoom(): Single<Game>
     fun addCloudAnchorID(cloudAnchorID: String, gameID: Int): Single<Game>
-    fun getGameRoomByID(gameID: String): Single<Game>
+    fun getGameRoomByID(gameID: Int): Single<Game>
     fun introPlayerData(userName: String, gameID: Int, playerOrder: String): Single<Player>
     fun switchCurrentPlayer(player: Player, gameID: Int): Single<Player>
 }
