@@ -4,8 +4,11 @@ import android.Manifest
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import artictactoe.managers.DisposableManager
-import artictactoe.managers.PermissionManager
+import android.widget.Button
+import android.widget.EditText
+import artictactoe.mvvm.managers.DisposableManager
+import artictactoe.mvvm.managers.PermissionManager
+import artictactoe.mvvm.utils.findView
 import artictactoe.mvvm.viewmodels.ITicTacToeViewModel
 import artictactoe.mvvm.viewmodels.TicTacToeViewModel
 import tictactoe.R
@@ -22,6 +25,10 @@ class MainActivity : AppCompatActivity() {
     private val snackbarHelper by lazy {
         SnackbarHelper()
     }
+
+    private val btCreateRoom: Button by findView(R.id.createRoom)
+    private val btConectRoom: Button by findView(R.id.conectRoom)
+    private val etRoomID: EditText by findView(R.id.roomID)
 
     private val gameViewModel: ITicTacToeViewModel by lazy {
         ViewModelProviders.of(this).get(TicTacToeViewModel::class.java)
@@ -40,10 +47,12 @@ class MainActivity : AppCompatActivity() {
             snackbarHelper.showMessage(this, getString(R.string.permission_granted))
         }
 
-        DisposableManager.add {
-            gameViewModel.createGameRoom().subscribe { game ->
-                game?.let {
-                    snackbarHelper.showMessage(this, "Game insertado")
+        btCreateRoom.setOnClickListener {
+            DisposableManager.add {
+                gameViewModel.createGameRoom().subscribe { game ->
+                    game?.let {
+                        snackbarHelper.showMessage(this, "Game insertado con gameID " + game.gameID)
+                    }
                 }
             }
         }
@@ -52,20 +61,25 @@ class MainActivity : AppCompatActivity() {
             DisposableManager.add {
                 gameViewModel.createCloudAnchor(customArFragment, hitResult.createAnchor())
                     .subscribe { it ->
-                        snackbarHelper.showMessage(this, "Cloud Ar hosteado")
+                        snackbarHelper.showMessage(this, "Cloud Ar hosteado para la room" + it.gameID)
                     }
             }
         }
-        DisposableManager.add {
-            gameViewModel.getGameRoomById(0, customArFragment).subscribe { it ->
-                snackbarHelper.showMessage(this, "Conectado a la sala 0")
-            }
-        }
 
-        DisposableManager.add {
-            gameViewModel.introPlayerData("Iván").subscribe { it ->
-                snackbarHelper.showMessage(this, "Nombre introducido")
+        btConectRoom.setOnClickListener {
+            if (etRoomID.text.toString().isNotEmpty()) {
+                DisposableManager.add {
+                    gameViewModel.getGameRoomById(etRoomID.text.toString().toInt(), customArFragment).subscribe { it ->
+                        snackbarHelper.showMessage(this, "Conectado a la sala " + it.gameID)
+                    }
+                }
             }
         }
+        /**
+        DisposableManager.add {
+        gameViewModel.introPlayerData("Iván").subscribe { it ->
+        snackbarHelper.showMessage(this, "Nombre introducido")
+        }
+        }**/
     }
 }

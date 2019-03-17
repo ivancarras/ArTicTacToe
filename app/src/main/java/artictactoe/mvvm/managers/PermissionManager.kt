@@ -1,4 +1,4 @@
-package artictactoe.managers
+package artictactoe.mvvm.managers
 
 import android.app.Activity
 import android.app.ActivityManager

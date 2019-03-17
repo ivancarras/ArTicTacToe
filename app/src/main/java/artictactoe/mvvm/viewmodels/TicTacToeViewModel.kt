@@ -4,7 +4,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import artictactoe.handlers.ArHandler
 import artictactoe.handlers.IArHandler
-import artictactoe.managers.DisposableManager
+import artictactoe.mvvm.managers.DisposableManager
 import artictactoe.mvvm.model.BaseNode
 import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.model.Game
@@ -127,13 +127,13 @@ class TicTacToeViewModel : ViewModel(), ITicTacToeViewModel {
         }
     }
 
-    fun update3DScene() {
-        //We have to update the scene refered to the live data model, we can use the observer in the view for call this function
+    private fun resolveCloudAnchor(cloudAnchorID: String, customArFragment: CustomArFragment) {
+        //We Get the resolve anchor
+        arHandler.resolveCloudAnchor(cloudAnchorID, customArFragment)
     }
 
-    private fun resolveCloudAnchor(cloudAnchorID: Int, customArFragment: CustomArFragment) {
-        //We Get the resolve anchor
-        arHandler.resolveCloudAnchor(cloudAnchorID.toString(), customArFragment)
+    fun update3DScene() {
+        //We have to update the scene refered to the live data model, we can use the observer in the view for call this function
     }
 
     private fun tableIsFull() =

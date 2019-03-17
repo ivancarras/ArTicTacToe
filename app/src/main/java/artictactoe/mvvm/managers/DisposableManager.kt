@@ -1,4 +1,4 @@
-package artictactoe.managers
+package artictactoe.mvvm.managers
 
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable

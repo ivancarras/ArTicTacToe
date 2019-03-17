@@ -60,9 +60,9 @@ class ArHandler : IArHandler {
         cloudAnchor = resolvedAnchor
 
         //We have to render the board
-        /*cloudAnchor?.let {
+        cloudAnchor?.let {
             placeObject(it, Uri.parse("ArcticFox_Posed.sfb"), customArFragment)
-        }*/
+        }
         /*snackbarHelper.showMessage(
             this@MainActivity
             ,

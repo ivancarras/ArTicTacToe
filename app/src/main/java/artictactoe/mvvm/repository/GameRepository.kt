@@ -1,7 +1,7 @@
 package artictactoe.mvvm.repository
 
 import android.util.Log
-import artictactoe.managers.StoreManager
+import artictactoe.mvvm.managers.StoreManager
 import artictactoe.mvvm.model.Game
 import com.google.firebase.database.*
 import io.reactivex.Single

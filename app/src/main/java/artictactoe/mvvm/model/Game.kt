@@ -7,7 +7,7 @@ data class Game(
     val gameID: Int,
     val player1: Player? = null,
     val player2: Player? = null,
-    val cloudAnchorId: Int? = null,
+    val cloudAnchorId: String? = null,
     val cells: List<List<Cell>> = List<List<Cell>>(BOARD_SIZE) {
         List<Cell>(BOARD_SIZE) {
             Cell(null)
