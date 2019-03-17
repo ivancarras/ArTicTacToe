@@ -12,7 +12,6 @@ object DisposableManager {
     }
 
     fun add(disposable: () -> Disposable) {
-        //Paque quede mas parsero pues asín con los corchetes
         compositeDisposable.add(disposable.invoke())
     }
 

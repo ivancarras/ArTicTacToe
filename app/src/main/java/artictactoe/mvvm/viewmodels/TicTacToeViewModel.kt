@@ -10,6 +10,7 @@ import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.model.Game
 import artictactoe.mvvm.repository.IRepository
 import artictactoe.mvvm.repository.Repository
+import artictactoe.mvvm.utils.subscribeAddingDisposable
 import artictactoe.mvvm.view.CustomArFragment
 import com.google.ar.core.Anchor
 import io.reactivex.Single
@@ -38,44 +39,38 @@ class TicTacToeViewModel : ViewModel(), ITicTacToeViewModel {
 
     override fun createGameRoom(): Single<Game> =
         Single.create<Game> { emitter ->
-            DisposableManager.add {
-                repository.createGameRoom().subscribe { game ->
-                    currentGameLiveData.value = game
-                    emitter.onSuccess(game)
-                }
+
+            repository.createGameRoom().subscribeAddingDisposable { game ->
+                currentGameLiveData.value = game
+                emitter.onSuccess(game)
             }
+
         }.subscribeOn(Schedulers.single())
 
 
     override fun getGameRoomById(gameID: Int, customArFragment: CustomArFragment): Single<Game> =
         Single.create<Game> { emitter ->
             //we resolve cloud anchor in the callback of the getCameRoomById
-            DisposableManager.add {
-                repository.getGameRoomByID(gameID).subscribe { it ->
-                    currentGameLiveData.value = it
-                    emitter.onSuccess(it)
+            repository.getGameRoomByID(gameID).subscribeAddingDisposable {
+                currentGameLiveData.value = it
+                emitter.onSuccess(it)
 
-                    it.cloudAnchorId?.let { cloudID ->
-                        resolveCloudAnchor(cloudID, customArFragment)
-                    }
-
+                it.cloudAnchorId?.let { cloudID ->
+                    resolveCloudAnchor(cloudID, customArFragment)
                 }
+
             }
         }.subscribeOn(Schedulers.single())
 
 
     override fun createCloudAnchor(customArFragment: CustomArFragment, anchor: Anchor): Single<Game> =
         Single.create<Game> { emitter ->
-            DisposableManager.add {
-                arHandler.createCloudAnchor(customArFragment, anchor).subscribe { cloudID ->
-                    currentGameLiveData.value?.let {
-                        DisposableManager.add {
-                            repository.addCloudAnchorID(cloudID, it.gameID).subscribe { it ->
-                                currentGameLiveData.value =
-                                    currentGameLiveData.value?.copy(cloudAnchorId = it.cloudAnchorId)
-                                emitter.onSuccess(it)
-                            }
-                        }
+            arHandler.createCloudAnchor(customArFragment, anchor).subscribeAddingDisposable { cloudID ->
+                currentGameLiveData.value?.let {
+                    repository.addCloudAnchorID(cloudID, it.gameID).subscribeAddingDisposable {
+                        currentGameLiveData.value =
+                            currentGameLiveData.value?.copy(cloudAnchorId = it.cloudAnchorId)
+                        emitter.onSuccess(it)
                     }
                 }
             }
@@ -88,20 +83,18 @@ class TicTacToeViewModel : ViewModel(), ITicTacToeViewModel {
                     "player2"
 
                 currentGameLiveData.value?.gameID?.let { gameID ->
-                    DisposableManager.add {
-                        repository.introPlayerData(userName, gameID, playerOrder).subscribe { player ->
-                            if (player.nodeType == BaseNode.NodeType.X) {
-                                currentGameLiveData.value =
-                                    currentGameLiveData.value?.copy(player1 = player)
-                            } else {
-                                currentGameLiveData.value =
-                                    currentGameLiveData.value?.copy(player2 = player)
-                            }
-                            currentGameLiveData.value?.let {
-                                emitter.onSuccess(it)
-                            }
-
+                    repository.introPlayerData(userName, gameID, playerOrder).subscribeAddingDisposable { player ->
+                        if (player.nodeType == BaseNode.NodeType.X) {
+                            currentGameLiveData.value =
+                                currentGameLiveData.value?.copy(player1 = player)
+                        } else {
+                            currentGameLiveData.value =
+                                currentGameLiveData.value?.copy(player2 = player)
                         }
+                        currentGameLiveData.value?.let {
+                            emitter.onSuccess(it)
+                        }
+
                     }
                 }
             }
@@ -119,10 +112,8 @@ class TicTacToeViewModel : ViewModel(), ITicTacToeViewModel {
 
     fun setCells(cells: List<List<Cell>>) {
         currentGameLiveData.value?.gameID?.let {
-            DisposableManager.add {
-                repository.setCells(cells, it).subscribe { newCells ->
-                    currentGameLiveData.value = currentGameLiveData.value?.copy(cells = newCells)
-                }
+            repository.setCells(cells, it).subscribeAddingDisposable { newCells ->
+                currentGameLiveData.value = currentGameLiveData.value?.copy(cells = newCells)
             }
         }
     }

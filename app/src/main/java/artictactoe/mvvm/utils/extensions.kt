@@ -4,16 +4,15 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import artictactoe.mvvm.managers.DisposableManager
 import io.reactivex.Single
-import io.reactivex.functions.Consumer
 
 fun <T : View> AppCompatActivity.findView(id: Int): Lazy<T> {
     return lazy {
-        findViewById(id) as T
+        findViewById<T>(id)
     }
 }
 
-fun <T> Single<T>.subscribeAddingDisposable(onSuccess: Consumer<T>){
+fun <T> Single<T>.subscribeAddingDisposable(onSuccess: (T) -> Unit) {
     DisposableManager.add {
-        this.subscribe(onSuccess)
+        this.subscribe(onSuccess::invoke)
     }
 }
