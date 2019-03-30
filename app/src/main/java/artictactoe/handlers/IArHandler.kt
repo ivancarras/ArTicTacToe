@@ -1,5 +1,6 @@
 package artictactoe.handlers
 
+import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.view.CustomArFragment
 import com.google.ar.core.Anchor
 import io.reactivex.Single
@@ -15,4 +16,6 @@ interface IArHandler {
     ): Single<String>
 
     fun resolveCloudAnchor(cloudAnchorID: String, customArFragment: CustomArFragment)
+
+    fun redrawCells(cells: List<List<Cell>>)
 }

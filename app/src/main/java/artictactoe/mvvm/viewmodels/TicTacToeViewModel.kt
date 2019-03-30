@@ -13,6 +13,7 @@ import artictactoe.mvvm.repository.Repository
 import artictactoe.mvvm.utils.subscribeAddingDisposable
 import artictactoe.mvvm.view.CustomArFragment
 import com.google.ar.core.Anchor
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
@@ -21,7 +22,7 @@ import io.reactivex.schedulers.Schedulers
  */
 class TicTacToeViewModel : ViewModel(), ITicTacToeViewModel {
 
-    val currentGameLiveData by lazy {
+    private val currentGameLiveData by lazy {
         MutableLiveData<Game>()
     }
 
@@ -118,13 +119,20 @@ class TicTacToeViewModel : ViewModel(), ITicTacToeViewModel {
         }
     }
 
+    override fun notifyCellChanges(gameID: Int): Observable<List<List<Cell>>> =
+        Observable.create { emitter ->
+            repository.notifyCellChanges(gameID).subscribeAddingDisposable {
+                //Aqui deberia haber un trigger dentro de un liveData wrapper
+                // que indique que hay que actualizar el AR
+
+                emitter.onNext(it)
+            }
+        }
+
+
     private fun resolveCloudAnchor(cloudAnchorID: String, customArFragment: CustomArFragment) {
         //We Get the resolve anchor
         arHandler.resolveCloudAnchor(cloudAnchorID, customArFragment)
-    }
-
-    fun update3DScene() {
-        //We have to update the scene refered to the live data model, we can use the observer in the view for call this function
     }
 
     private fun tableIsFull() =

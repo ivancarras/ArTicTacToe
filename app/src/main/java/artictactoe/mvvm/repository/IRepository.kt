@@ -3,6 +3,7 @@ package artictactoe.mvvm.repository
 import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.model.Game
 import artictactoe.mvvm.model.Player
+import io.reactivex.Observable
 import io.reactivex.Single
 
 /**
@@ -15,4 +16,5 @@ interface IRepository {
     fun getGameRoomByID(gameID: Int): Single<Game>
     fun introPlayerData(userName: String, gameID: Int, playerOrder: String): Single<Player>
     fun switchCurrentPlayer(player: Player, gameID: Int): Single<Player>
+    fun notifyCellChanges(gameID: Int): Observable<List<List<Cell>>>
 }

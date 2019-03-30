@@ -4,6 +4,7 @@ import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.model.Game
 import artictactoe.mvvm.model.Player
 import com.google.firebase.database.FirebaseDatabase
+import io.reactivex.Observable
 import io.reactivex.Single
 
 /**
@@ -31,12 +32,16 @@ class FirebaseRepository : IFirebaseRepository {
         cellRepository.setCells(cells, gameID)
 
 
+    override fun notifyCellChanges(gameID: Int): Observable<List<List<Cell>>> =
+        cellRepository.notifyCellChanges(gameID)
+
+
     override fun createGameRoom(): Single<Game> =
         gameRepository.createGameRoom()
 
+
     override fun addCloudAnchorID(cloudAnchorID: String, gameID: Int): Single<Game> =
         gameRepository.addCloudAnchorID(cloudAnchorID, gameID)
-
 
     override fun getGameRoomByID(gameID: Int): Single<Game> =
         gameRepository.getGameRoomByID(gameID)

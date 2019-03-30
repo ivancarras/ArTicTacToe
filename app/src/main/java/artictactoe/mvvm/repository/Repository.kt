@@ -3,6 +3,7 @@ package artictactoe.mvvm.repository
 import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.model.Game
 import artictactoe.mvvm.model.Player
+import io.reactivex.Observable
 import io.reactivex.Single
 
 /**
@@ -16,6 +17,9 @@ class Repository : IRepository {
 
     override fun setCells(cells: List<List<Cell>>, gameID: Int): Single<List<List<Cell>>> =
         firebaseRepository.setCells(cells, gameID)
+
+    override fun notifyCellChanges(gameID: Int): Observable<List<List<Cell>>> =
+        firebaseRepository.notifyCellChanges(gameID)
 
     override fun createGameRoom(): Single<Game> =
         firebaseRepository.createGameRoom()

@@ -32,20 +32,22 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation "com.android.support:support-media-compat:28.0.0"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     //Provides ARCore Session and related resources.
-    implementation 'com.google.ar:core:1.7.0'
+    implementation 'com.google.ar:core:1.8.0'
     // Provides ArFragment, and other UX resources.
-    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.7.0'
+    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.8.0'
     // Alternatively, use ArSceneView without the UX dependency.
-    implementation 'com.google.ar.sceneform:core:1.7.0'
+    implementation 'com.google.ar.sceneform:core:1.8.0'
     //Load 3d models at runtime
-    implementation 'com.google.ar.sceneform:assets:1.7.0'
+    implementation 'com.google.ar.sceneform:assets:1.8.0'
 
-    implementation 'com.google.firebase:firebase-core:16.0.7'
+    implementation 'com.google.firebase:firebase-core:16.0.8'
     implementation 'com.google.firebase:firebase-database:16.1.0'
 
     implementation 'com.android.support:design:28.0.0'

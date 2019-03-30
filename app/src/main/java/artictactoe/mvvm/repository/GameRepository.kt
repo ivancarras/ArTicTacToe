@@ -1,7 +1,5 @@
 package artictactoe.mvvm.repository
 
-import android.util.Log
-import artictactoe.mvvm.managers.StoreManager
 import artictactoe.mvvm.model.Game
 import com.google.firebase.database.*
 import io.reactivex.Single
@@ -38,7 +36,7 @@ class GameRepository(val firebaseInstance: FirebaseDatabase) : IGameRepository {
             .runTransaction(object : Transaction.Handler {
                 override fun onComplete(p0: DatabaseError?, p1: Boolean, p2: DataSnapshot?) {
                     if (!p1) {
-                        Log.e(StoreManager.TAG, "Firebase Error", p0?.toException())
+                       // Log.e(StoreManager.TAG, "Firebase Error", p0?.toException())
                     } else {
                         p2?.value?.let {
                             val gameId: Int = (it as Long).toInt()

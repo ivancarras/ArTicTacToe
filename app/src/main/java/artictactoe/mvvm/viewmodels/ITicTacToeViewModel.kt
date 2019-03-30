@@ -1,8 +1,10 @@
 package artictactoe.mvvm.viewmodels
 
+import artictactoe.mvvm.model.Cell
 import artictactoe.mvvm.model.Game
 import artictactoe.mvvm.view.CustomArFragment
 import com.google.ar.core.Anchor
+import io.reactivex.Observable
 import io.reactivex.Single
 
 /**
@@ -13,4 +15,5 @@ interface ITicTacToeViewModel {
     fun getGameRoomById(gameID: Int, customArFragment: CustomArFragment): Single<Game>
     fun createCloudAnchor(customArFragment: CustomArFragment, anchor: Anchor): Single<Game>
     fun introPlayerData(userName: String): Single<Game>
+    fun notifyCellChanges(gameID: Int): Observable<List<List<Cell>>>
 }

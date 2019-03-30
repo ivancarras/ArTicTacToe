@@ -49,9 +49,7 @@ class MainActivity : AppCompatActivity() {
 
         btCreateRoom.setOnClickListener {
             gameViewModel.createGameRoom().subscribeAddingDisposable { game ->
-                game?.let {
-                    snackbarHelper.showMessage(this, "Game insertado con gameID " + game.gameID)
-                }
+                snackbarHelper.showMessage(this, "Game insertado con gameID " + game.gameID)
             }
         }
 
@@ -67,6 +65,10 @@ class MainActivity : AppCompatActivity() {
                 gameViewModel.getGameRoomById(etRoomID.text.toString().toInt(), customArFragment)
                     .subscribeAddingDisposable { it ->
                         snackbarHelper.showMessage(this, "Conectado a la sala " + it.gameID)
+
+                        gameViewModel.notifyCellChanges(it.gameID).subscribeAddingDisposable {
+                            snackbarHelper.showMessage(this, "Celdas changed")
+                        }
                     }
             }
         }
